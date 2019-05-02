@@ -8,7 +8,8 @@ import {
     Button,
     ScrollView,
     AsyncStorage,
-    Picker
+    Picker,
+    ToastAndroid
 } from 'react-native';
 import _ from 'lodash';
 
@@ -41,6 +42,8 @@ const rowStyle = {
     padding: 10,
     justifyContent: 'space-between'
 };
+
+
 
 
 class CreateScreen extends Component{
@@ -141,8 +144,88 @@ class CreateScreen extends Component{
         this.props.navigation.navigate('App');
     }
 
+    async onCreateEvent(){
+        console.log('test');
+        console.log(this.state);
+        try {
+            if(_.isNil(this.state.name) ||
+                this.state.name==='' ||
+                _.isNil(this.state.location) ||
+                _.isNil(this.state.date) ||
+                _.isNil(this.state.time)
+            ){
+                throw "Failed! Please Enter important Fields";
+            }
+
+            console.log(this.state);
+            //"name": "string",
+            const name = this.state.name;
+            //"details": "string",
+            const details = '';
+            //"location-name": "string",
+            const location_name = this.state.location.name;
+            //"location": "string",
+            const location = this.state.location.coordinates;
+            //"min": "number",
+            const min = this.state.min;
+            //"max": "number",
+            const max = this.state.max;
+            //"datetime": "string, in the format M/d/Y hh:mm",
+            const datetime = `${this.state.date[1]}/${this.state.date[2]}/${this.state.date[0]} ${this.state.time[0]}:${this.state.time[1]}`;
+            //"category": "string"
+            const category = this.state.category;
+
+            console.log({
+                name,
+                details,
+                location_name,
+                location,
+                min,
+                max,
+                datetime,
+                category
+            });
+            //
+            let serialize = function(obj) {
+                let str = [];
+                for (var p in obj)
+                    if (obj.hasOwnProperty(p)) {
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    }
+                return str.join("&");
+            };
+
+            let response = await fetch('https://teamup-cc-546.appspot.com/create-event', {
+                method: 'POST',
+                headers: {
+                    Auth: 'lvargis@asu.edu',
+                    Accept: 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: serialize({
+                    name,
+                    details,
+                    location_name,
+                    location,
+                    min,
+                    max,
+                    datetime,
+                    category
+                }),
+            });
+
+            console.log(response);
+        }catch (e) {
+            console.log(e);
+            ToastAndroid.show(e, ToastAndroid.LONG)
+        }finally {
+            this.props.navigation.navigate("Home");
+        }
+
+
+    }
+
     render(){
-        console.log(categories[0]);
         return (
             <ScrollView style={createStyle}>
                 <View style={rowStyle}>
@@ -215,7 +298,7 @@ class CreateScreen extends Component{
                 </View>
 
                 <View style={rowStyle}>
-                    <Button title='Create' onPress={()=>{}} />
+                    <Button title='Create' onPress={()=>{this.onCreateEvent()}} />
                     <Button title='Cancel' onPress={()=>this._onCancel()} />
 
                 </View>

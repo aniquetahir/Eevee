@@ -4,6 +4,17 @@ import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 
 import _ from 'lodash';
 
 let navi = null;
+
+const serialize = function(obj) {
+    let str = [];
+    for (let p in obj)
+        if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+        }
+    return str.join("&");
+};
+
+
 class Header extends React.Component{
     _onFilter(){
         if(!_.isNil(navi))
@@ -20,35 +31,101 @@ class Header extends React.Component{
 }
 
 class EventItem extends React.Component{
-  render() {
-      let {name, distance, vacancy, capacity, num_participants, datetime} = this.props;
-      let date = Date.parse(datetime);
 
-    return (
-        <Card>
-          <CardImage
-              source={{uri: 'http://bit.ly/2GfzooV'}}
-              title={name}
+    async callAPI(url, params, method){
+        let encoded_params = serialize(params);
 
-          />
-          <CardTitle
-              subtitle={`Distance: ${_.round(distance, 2)} km`}
-          />
-            <CardContent text={(vacancy)?`Vacancy: ${vacancy}/${capacity}`:`Participants: ${num_participants}`} >
-            </CardContent>
-            <Text>Date: {datetime}</Text>
-          <CardAction
-              separator={true}
-              inColumn={false}>
-            <CardButton
-                onPress={() => {}}
-                title="Join"
-                color="#FEB557"
-            />
-          </CardAction>
-        </Card>
-    );
-  }
+        if(method!=='POST'){
+            let response = await fetch(`${url}?${encoded_params}`, {
+                method: method,
+                headers: {
+                    Auth: 'lvargis@asu.edu',
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            });
+            return response;
+        }else {
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Auth: 'lvargis@asu.edu',
+                    Accept: 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: encoded_params,
+            });
+            return response;
+        }
+
+    }
+
+    async onJoinEvent(){
+        let response = await this.callAPI('https://teamup-cc-546.appspot.com/add-event-user', {event_id: this.props.event_id},'GET');
+        console.log(response);
+        this.props.parent.componentDidMount();
+        //this.props.navigation.navigate('Events');
+    }
+
+    async onLeaveEvent(){
+        let response = await this.callAPI('https://teamup-cc-546.appspot.com/cancel-event-participation', {event_id: this.props.event_id},'GET');
+        console.log(response);
+        this.props.parent.componentDidMount();
+        //this.props.navigation.navigate('Events');
+    }
+
+
+    async onRemoveEvent(){
+        let response = await this.callAPI('https://teamup-cc-546.appspot.com/delete-event', {event_id: this.props.event_id},'DELETE');
+        console.log(response);
+        this.props.parent.componentDidMount();
+        //this.props.navigation.navigate('Events');
+    }
+
+
+    render() {
+        let {name, distance, vacancy, capacity, num_participants, datetime} = this.props;
+        let date = Date.parse(datetime);
+
+        return (
+            <Card>
+                <CardImage
+                source={{uri: 'http://bit.ly/2GfzooV'}}
+                title={name}
+
+                />
+                <CardTitle
+                subtitle={`Distance: ${_.round(distance, 2)} km`}
+                />
+                <CardContent text={(vacancy)?`Vacancy: ${vacancy}/${capacity}`:`Participants: ${num_participants}`} >
+                </CardContent>
+                <Text>Date: {datetime}</Text>
+                <CardAction
+                    separator={true}
+                    inColumn={false}>
+                    {this.props.is_owner?
+                        (<CardButton
+                              onPress={() => {this.onRemoveEvent()}}
+                              title="Delete"
+                              color="#FEAAAA"
+                        />):this.props.is_joined?(
+                          <CardButton
+                              onPress={() => {this.onLeaveEvent()}}
+                              title="Leave"
+                              color="#FEB557"
+                          />
+                        ):(
+                          <CardButton
+                              onPress={() => {this.onJoinEvent()}}
+                              title="Join"
+                              color="#FEB557"
+                          />
+                )}
+
+                </CardAction>
+            </Card>
+        );
+    }
 }
 
 export default class EventsScreen extends React.Component {
@@ -60,11 +137,13 @@ export default class EventsScreen extends React.Component {
       super();
       this.state={
           location: null,
-          events: []
+          events: [],
+          user:null
       }
   }
   componentDidMount() {
       navi = this.props.navigation;
+      this.loadUser();
       //console.log(navigator.geolocation);
       navigator.geolocation.getCurrentPosition(position => {
           this.setState({
@@ -76,7 +155,7 @@ export default class EventsScreen extends React.Component {
 
           this.loadEvents(position.coords);
 
-      });
+      }, ()=>{}, {enableHighAccuracy: false, timeout: 10000, maximumAge: 0});
   }
 
     loadUser = async ()=>{
@@ -126,6 +205,14 @@ export default class EventsScreen extends React.Component {
                            capacity={event.max}
                            num_participants={event.count_of_participants}
                            datetime={event.datetime}
+                        is_joined={event.is_joined}
+                        is_owner={event.is_owner}
+                        event_id={event.event_id}
+                        location_coords={event.location_coords}
+                        location_name={event.location_name}
+                        user={this.state.user}
+                        parent={this}
+
                 />
             );
         });

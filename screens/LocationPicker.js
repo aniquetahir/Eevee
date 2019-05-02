@@ -60,19 +60,21 @@ export default class LocationPicker extends Component{
     }
 
     componentDidMount(){
+        console.log("Getting locations");
         this.getLocations();
     }
 
     async setNewLocation(position, category){
+        console.log("Setting locations");
         let latlng = `${position.coords.latitude},${position.coords.longitude}`;
-        console.log(`https://teamup-cc-546.appspot.com/get-locations?location=${latlng}&category=${category}`,{
+        console.log(`https://teamup-cc-546.appspot.com/get-locations?location=${latlng}&category=${category}`);
+        let response = await fetch(`https://teamup-cc-546.appspot.com/get-locations?location=${latlng}&category=${category}`, {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             }
         });
-        let response = await fetch(`https://teamup-cc-546.appspot.com/get-locations?location=${latlng}&category=${category}`);
         let r = await response.json();
         console.log(r);
         this.setState({
@@ -83,9 +85,11 @@ export default class LocationPicker extends Component{
     async getLocations(){
         let create_state = await AsyncStorage.getItem('create_cache');
         create_state = JSON.parse(create_state);
+        console.log("Calling Navigator");
         navigator.geolocation.getCurrentPosition(position => {
+            console.log(position);
             this.setNewLocation(position, create_state.category);
-        })
+        });
 
     }
 
