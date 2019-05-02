@@ -39,7 +39,7 @@ class EventItem extends React.Component{
             let response = await fetch(`${url}?${encoded_params}`, {
                 method: method,
                 headers: {
-                    Auth: 'lvargis@asu.edu',
+                    Auth: this.props.user.email,
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 }
@@ -49,7 +49,7 @@ class EventItem extends React.Component{
             let response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    Auth: 'lvargis@asu.edu',
+                    Auth: this.props.user.email,
                     Accept: 'application/json',
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
@@ -141,6 +141,9 @@ export default class EventsScreen extends React.Component {
           user:null
       }
   }
+
+
+
   componentDidMount() {
       navi = this.props.navigation;
       this.loadUser();
@@ -166,13 +169,16 @@ export default class EventsScreen extends React.Component {
     };
 
   async loadEvents(position){
+      if(!this.state.user){
+          return;
+      }
       try {
           let {latitude, longitude} = position;
 
           let response = await fetch(`https://teamup-cc-546.appspot.com/get-nearby-events?location_coords=${latitude},${longitude}`, {
               method: 'GET',
               headers: {
-                  Auth: 'lvargis@asu.edu',
+                  Auth: this.state.user.email,
                   Accept: 'application/json',
                   'Content-Type': 'application/json',
               }

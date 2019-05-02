@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, ScrollView, Button, Text} from 'react-native';
+import {View, ScrollView, Button, Text, AsyncStorage} from 'react-native';
 
 const serialize = function(obj) {
     let str = [];
@@ -47,10 +47,18 @@ export default class ModifyInterestsScreen extends Component{
     constructor(props){
         super(props);
         this.state = {
-            interests: []
+            interests: [],
+            user: null
         }
 
     }
+
+    loadUser = async ()=>{
+        const user_details = await AsyncStorage.getItem('user_details');
+        this.setState({
+            user:{...JSON.parse(user_details)}
+        });
+    };
 
     async callAPI(url, params, method){
         let encoded_params = serialize(params);
@@ -59,7 +67,7 @@ export default class ModifyInterestsScreen extends Component{
             let response = await fetch(`${url}?${encoded_params}`, {
                 method: method,
                 headers: {
-                    Auth: 'lvargis@asu.edu',
+                    Auth: this.state.user.email,
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 }
@@ -69,7 +77,7 @@ export default class ModifyInterestsScreen extends Component{
             let response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    Auth: 'lvargis@asu.edu',
+                    Auth: this.state.user.email,
                     Accept: 'application/json',
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
@@ -82,6 +90,7 @@ export default class ModifyInterestsScreen extends Component{
 
     componentDidMount() {
         this.loadInterests();
+        this.loadUser();
     }
 
     async loadInterests(){

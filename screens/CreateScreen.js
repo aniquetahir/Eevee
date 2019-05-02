@@ -60,7 +60,8 @@ class CreateScreen extends Component{
             date: null,
             time: null,
             min: '',
-            max: ''
+            max: '',
+            user: null
         }
     }
 
@@ -128,10 +129,16 @@ class CreateScreen extends Component{
         }
     }
 
+    loadUser = async ()=>{
+        const user_details = await AsyncStorage.getItem('user_details');
+        this.setState({
+            user:{...JSON.parse(user_details)}
+        });
+    };
 
     componentDidMount() {
         this.restoreState();
-
+        this.loadUser();
     }
 
     async _onCancel(){
@@ -198,7 +205,7 @@ class CreateScreen extends Component{
             let response = await fetch('https://teamup-cc-546.appspot.com/create-event', {
                 method: 'POST',
                 headers: {
-                    Auth: 'lvargis@asu.edu',
+                    Auth: this.state.user.email,
                     Accept: 'application/json',
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },

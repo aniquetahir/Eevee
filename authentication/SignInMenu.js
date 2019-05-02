@@ -16,6 +16,15 @@ const LoginPage = props => {
     );
 };
 
+const serialize = function(obj) {
+    let str = [];
+    for (let p in obj)
+        if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+        }
+    return str.join("&");
+};
+
 const WelcomePage = props => {
     return (
         <View>
@@ -41,16 +50,58 @@ class SignInMenu extends Component{
         this.checkStorage();
     }
 
+    async callAPI(url, params, method){
+        let encoded_params = serialize(params);
+
+        if(method!=='POST'){
+            let response = await fetch(`${url}?${encoded_params}`, {
+                method: method,
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            });
+            return response;
+        }else {
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: encoded_params,
+            });
+            return response;
+        }
+
+    }
+
+    getLocation(){
+        return new Promise((res, rej)=>{
+           navigator.geolocation.getCurrentPosition((position)=>{
+              res(position.coords);
+           });
+        });
+    }
+
     checkStorage = async () => {
         try {
             const user_details = await AsyncStorage.getItem('user_details');
             if(!_.isNil(user_details)){
                 console.log(user_details);
+                let user_details_obj = JSON.parse(user_details);
+                let location = await this.getLocation();
+                location = `${location.latitude},${location.longitude}`;
+                let response = await this.callAPI('https://teamup-cc-546.appspot.com/login',
+                    {name: user_details_obj.name , email:user_details_obj.email, location:location},
+                    'POST');
+                console.log(response);
                 this.setState({
                     signedIn: true,
                     ...user_details
-                })
+                });
                 this.props.navigation.navigate('App');
+
             }
         }catch (e) {
             console.log(e);
@@ -66,7 +117,10 @@ class SignInMenu extends Component{
             photoUrl: ''
         });
         await AsyncStorage.setItem('user_details', JSON.stringify({name: 'Anique', email: 'admin@eevee', photoUrl: ''}));
-
+        let location = await this.getLocation();
+        let response = await this.callAPI('https://teamup-cc-546.appspot.com/login',
+            {name: user_details.name , email:user_details.email, location:location},
+            'POST');
         this.props.navigation.navigate('App', {name: 'Anique', email: 'admin@eevee', photoUrl: ''});
     };
 
@@ -82,6 +136,10 @@ class SignInMenu extends Component{
                     signedIn: true,
                     ...result.user
                 });
+                let location = await this.getLocation();
+                let response = await this.callAPI('https://teamup-cc-546.appspot.com/login',
+                    {name: user_details.name , email:user_details.email, location:location},
+                    'POST');
                 await AsyncStorage.setItem('user_details', JSON.stringify(result.user));
                 const {name, email, photoUrl} = result.user;
                 this.props.navigation.navigate('App', {name, email, photoUrl});

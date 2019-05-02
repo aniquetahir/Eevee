@@ -7,6 +7,8 @@ import HomeScreen from '../screens/HomeScreen';
 import EventsScreen from '../screens/EventsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
+import NotificationScreen from '../screens/NotificationScreen';
+
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
 });
@@ -39,6 +41,21 @@ EventsStack.navigationOptions = {
   ),
 };
 
+const NotificationStack = createStackNavigator({
+   Notifications: NotificationScreen,
+});
+
+NotificationStack.navigationOptions = {
+    tabBarLabel: 'Notifications',
+    tabBarIcon: ({ focused }) => (
+        <TabBarIcon
+            focused={focused}
+            name={Platform.OS === 'ios' ? 'ios-notifications' : 'md-notifications'}
+        />
+    ),
+};
+
+
 const SettingsStack = createStackNavigator({
   Settings: SettingsScreen,
 });
@@ -57,4 +74,5 @@ export default createBottomTabNavigator({
   HomeStack,
   EventsStack,
   SettingsStack,
+  NotificationStack,
 });

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, View, ScrollView, Text, TextInput, Picker} from 'react-native';
+import {Button, View, ScrollView, Text, TextInput, Picker, AsyncStorage} from 'react-native';
 import _ from 'lodash';
 
 const days = [
@@ -32,7 +32,8 @@ export default class AddInterestScreen extends Component{
             day: days[0],
             tod: times_of_day[0][1],
             category: categories[0],
-            radius: 1.5
+            radius: 1.5,
+            user: null
         }
     }
     getPosition(){
@@ -43,6 +44,18 @@ export default class AddInterestScreen extends Component{
             });
         });
     }
+
+    loadUser = async ()=>{
+        const user_details = await AsyncStorage.getItem('user_details');
+        this.setState({
+            user:{...JSON.parse(user_details)}
+        });
+    };
+
+    componentDidMount(){
+        this.loadUser();
+    }
+
     async onAddInterests(){
         // "category": "string",
         // "location": "string",
@@ -70,10 +83,11 @@ export default class AddInterestScreen extends Component{
             radius,
             time_tag
         }));
+
         let response = await fetch('https://teamup-cc-546.appspot.com/create-interest', {
             method: 'POST',
             headers: {
-                Auth: 'lvargis@asu.edu',
+                Auth: this.state.user.email,
                 Accept: 'application/json',
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
