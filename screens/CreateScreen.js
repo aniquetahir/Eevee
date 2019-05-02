@@ -1,5 +1,15 @@
 import React, {Component} from 'react';
-import {Text, TextInput, View, DatePickerAndroid, TimePickerAndroid, Button, ScrollView, AsyncStorage} from 'react-native';
+import {
+    Text,
+    TextInput,
+    View,
+    DatePickerAndroid,
+    TimePickerAndroid,
+    Button,
+    ScrollView,
+    AsyncStorage,
+    Picker
+} from 'react-native';
 import _ from 'lodash';
 
 const createStyle = {
@@ -17,6 +27,12 @@ const labelStyle = {
 const minMaxStyle = {
   minWidth: '20%',
 };
+
+const categories = [
+    "Sports",
+    "Food",
+    "Film"
+];
 
 const rowStyle = {
     flex:1,
@@ -36,6 +52,7 @@ class CreateScreen extends Component{
         super(props);
         this.state = {
             name: null,
+            category: null,
             location: null,
             date: null,
             time: null,
@@ -101,7 +118,7 @@ class CreateScreen extends Component{
             cached_location = JSON.parse(cached_location);
             this.setState({
                 location: cached_location
-            })
+            });
 
         }catch (e) {
             console.log(e);
@@ -125,6 +142,7 @@ class CreateScreen extends Component{
     }
 
     render(){
+        console.log(categories[0]);
         return (
             <ScrollView style={createStyle}>
                 <View style={rowStyle}>
@@ -137,10 +155,31 @@ class CreateScreen extends Component{
                 </View>
 
                 <View style={rowStyle}>
-                    <Text style={labelStyle}>Location:</Text>
-                    <Text>{_.isNil(this.state.location)?'No Location Selected':this.state.location.name}</Text>
-                    <Button title="Pick" onPress={()=>this.pickLocation()} />
+                    <Text style={labelStyle}>Category:</Text>
+                    <Picker
+                        selectedValue={this.state.category?this.state.category:"sports"}
+                        style={{ minWidth: 200}}
+                        onValueChange={itemValue =>
+                            this.setState({category: itemValue})
+                        }>
+
+                            <Picker.Item label="Sports" value="sports" />
+                            <Picker.Item label="Film" value="film" />
+                            <Picker.Item label="Food" value="food" />
+
+                    </Picker>
                 </View>
+
+                {
+                    (this.state.category)?
+                        (
+                            <View style={rowStyle}>
+                                <Text style={labelStyle}>Location:</Text>
+                                <Text>{_.isNil(this.state.location) ? 'No Location Selected' : this.state.location.name}</Text>
+                                <Button title="Pick" onPress={() => this.pickLocation()}/>
+                            </View>
+                        ):null
+                }
 
                 <View style={rowStyle}>
                     <Text style={labelStyle}>Date:</Text>

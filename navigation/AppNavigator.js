@@ -6,6 +6,9 @@ import MainTabNavigator from './MainTabNavigator';
 import CreateScreen from '../screens/CreateScreen';
 import FilterScreen from '../screens/FilterScreen';
 import LocationPicker from '../screens/LocationPicker';
+import ModifyInterestsScreen from '../screens/ModifyInterestsScreen';
+import AddInterestsScreen from '../screens/AddInterestScreen';
+
 
 
 export default createAppContainer(createSwitchNavigator({
@@ -15,5 +18,7 @@ export default createAppContainer(createSwitchNavigator({
   App: MainTabNavigator,
   Create: CreateScreen,
   Filter: FilterScreen,
+  Interests: ModifyInterestsScreen,
+  AddInterests: AddInterestsScreen,
   LocationPicker
 }));

@@ -30,6 +30,7 @@ class HelloWorldApp extends Component {
     return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <Button title="Create Event" onPress={()=>this.props.navigation.navigate('Create')} />
+          <Button title="Add/Edit Interests" onPress={()=>this.props.navigation.navigate('Interests')} />
           <Button title="Sign Out" onPress={()=>this.signOut()} />
         </View>
     );

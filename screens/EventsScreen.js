@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, Button, View } from 'react-native';
+import {ScrollView, StyleSheet, Text, Button, View, AsyncStorage} from 'react-native';
 import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards';
 import _ from 'lodash';
 
@@ -21,16 +21,22 @@ class Header extends React.Component{
 
 class EventItem extends React.Component{
   render() {
+      let {name, distance, vacancy, capacity, num_participants, datetime} = this.props;
+      let date = Date.parse(datetime);
+
     return (
         <Card>
           <CardImage
               source={{uri: 'http://bit.ly/2GfzooV'}}
-              title="Test Event"
+              title={name}
+
           />
           <CardTitle
-              subtitle="Distance: 0.5mi"
+              subtitle={`Distance: ${_.round(distance, 2)} km`}
           />
-          <CardContent text="Vacancy 2/10" />
+            <CardContent text={(vacancy)?`Vacancy: ${vacancy}/${capacity}`:`Participants: ${num_participants}`} >
+            </CardContent>
+            <Text>Date: {datetime}</Text>
           <CardAction
               separator={true}
               inColumn={false}>
@@ -49,8 +55,60 @@ export default class EventsScreen extends React.Component {
   static navigationOptions = {
     headerTitle: <Header />,
   };
+
+  constructor(){
+      super();
+      this.state={
+          location: null,
+          events: []
+      }
+  }
   componentDidMount() {
       navi = this.props.navigation;
+      //console.log(navigator.geolocation);
+      navigator.geolocation.getCurrentPosition(position => {
+          this.setState({
+              location: {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude
+              }
+          });
+
+          this.loadEvents(position.coords);
+
+      });
+  }
+
+    loadUser = async ()=>{
+        const user_details = await AsyncStorage.getItem('user_details');
+        this.setState({
+            user:{...JSON.parse(user_details)}
+        });
+    };
+
+  async loadEvents(position){
+      try {
+          let {latitude, longitude} = position;
+
+          let response = await fetch(`https://teamup-cc-546.appspot.com/get-nearby-events?location_coords=${latitude},${longitude}`, {
+              method: 'GET',
+              headers: {
+                  Auth: 'lvargis@asu.edu',
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+              }
+          });
+          let responseJson = await response.json();
+          this.setState({
+              events: responseJson
+          });
+
+
+
+      }catch (e) {
+          console.log(e);
+      }
+
   }
 
   componentWillUnmount() {
@@ -58,19 +116,27 @@ export default class EventsScreen extends React.Component {
   }
 
     render() {
-    return (
-      <ScrollView style={styles.container}>
+        let event_items = this.state.events.map((event, i)=>{
+            return (
+                <EventItem
+                        key={i}
+                        name={event.name}
+                           distance={event.distance}
+                           vacancy={_.isUndefined(event.vacancy)?null:event.vacancy}
+                           capacity={event.max}
+                           num_participants={event.count_of_participants}
+                           datetime={event.datetime}
+                />
+            );
+        });
+        return (
+        <ScrollView style={styles.container}>
         {/* Go ahead and delete ExpoLinksView and replace it with your
            * content, we just wanted to provide you with some helpful links */}
-        <EventItem/>
-        <EventItem/>
-        <EventItem/>
-        <EventItem/>
-        <EventItem/>
-
-      </ScrollView>
-    );
-  }
+            {event_items}
+        </ScrollView>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
