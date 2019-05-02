@@ -138,7 +138,7 @@ class SignInMenu extends Component{
                 });
                 let location = await this.getLocation();
                 let response = await this.callAPI('https://teamup-cc-546.appspot.com/login',
-                    {name: user_details.name , email:user_details.email, location:location},
+                    {name: results.user.name , email:results.user.email, location:location},
                     'POST');
                 await AsyncStorage.setItem('user_details', JSON.stringify(result.user));
                 const {name, email, photoUrl} = result.user;
