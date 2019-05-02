@@ -135,7 +135,8 @@ export default class AddInterestScreen extends Component{
                 </Picker>
 
                 <Text>Radius: </Text>
-                <TextInput  keyboardType='decimal-pad' onChangeText={text=>this.setState({radius: parseFloat(text)})} value={this.state.radius.toString()} />
+                <TextInput  keyboardType='decimal-pad' onChangeText={text=>this.setState({radius: parseFloat(text)})}
+                            value={(_.isNaN(this.state.radius))?'0':this.state.radius.toString()} />
 
                 <Button title="Save" onPress={()=>{this.onAddInterests();}}/>
                 <Button title="Back" onPress={()=>this.props.navigation.navigate("Interests")}/>
