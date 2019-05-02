@@ -24,7 +24,7 @@ class Header extends React.Component{
         return (
             <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between', padding: 10}} >
                 <Text style={{width: '50%',fontSize: 20, fontWeight: 'bold', alignSelf: 'stretch'}}>Events</Text>
-                <Button title='Filter' onPress={()=>this._onFilter()}/>
+                {/*<Button title='Filter' onPress={()=>this._onFilter()}/>*/}
             </View>
         );
     }
@@ -138,7 +138,8 @@ export default class EventsScreen extends React.Component {
       this.state={
           location: null,
           events: [],
-          user:null
+          user:null,
+          timer: null
       }
   }
 
@@ -157,8 +158,16 @@ export default class EventsScreen extends React.Component {
           });
 
           this.loadEvents(position.coords);
+          let timer = setInterval(()=>{this.loadEvents(position.coords)}, 5000);
+          this.setState({timer: timer});
 
       }, ()=>{}, {enableHighAccuracy: false, timeout: 10000, maximumAge: 0});
+  }
+
+  componentWillUnmount(){
+      if(this.state.timer){
+          clearInterval(this.state.timer);
+      }
   }
 
     loadUser = async ()=>{
@@ -170,6 +179,7 @@ export default class EventsScreen extends React.Component {
 
   async loadEvents(position){
       if(!this.state.user){
+          console.log(this.state.user);
           return;
       }
       try {

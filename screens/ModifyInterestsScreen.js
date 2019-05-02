@@ -89,8 +89,11 @@ export default class ModifyInterestsScreen extends Component{
     }
 
     componentDidMount() {
-        this.loadInterests();
-        this.loadUser();
+        this.loadUser().then(()=>{
+            this.loadInterests();
+        });
+
+
     }
 
     async loadInterests(){

@@ -39,6 +39,7 @@ export default class NotificationScreen extends Component{
         this.state = {
             notifications: [],
             user: null,
+            timer: null
         }
     }
 
@@ -49,9 +50,19 @@ export default class NotificationScreen extends Component{
         });
     };
 
+
+    componentWillUnmount(){
+        if(this.state.timer){
+            clearInterval(this.state.timer);
+        }
+    }
+
     componentDidMount(){
+
         this.loadNotifications();
-        this.loadUser()
+        this.loadUser();
+        let timer = setInterval(()=>{this.loadNotifications()}, 5000);
+        this.setState({timer: timer});
     }
 
     async callAPI(url, params, method){
