@@ -137,9 +137,11 @@ class SignInMenu extends Component{
                     ...result.user
                 });
                 let location = await this.getLocation();
+                console.log({name: result.user.name , email:result.user.email, location:location});
                 let response = await this.callAPI('https://teamup-cc-546.appspot.com/login',
                     {name: result.user.name , email:result.user.email, location:location},
                     'POST');
+                console.log(response);
                 await AsyncStorage.setItem('user_details', JSON.stringify(result.user));
                 const {name, email, photoUrl} = result.user;
                 this.props.navigation.navigate('App', {name, email, photoUrl});

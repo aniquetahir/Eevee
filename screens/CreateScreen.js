@@ -55,7 +55,7 @@ class CreateScreen extends Component{
         super(props);
         this.state = {
             name: null,
-            category: null,
+            category: 'sports',
             location: null,
             date: null,
             time: null,
@@ -260,16 +260,12 @@ class CreateScreen extends Component{
                     </Picker>
                 </View>
 
-                {
-                    (this.state.category)?
-                        (
-                            <View style={rowStyle}>
-                                <Text style={labelStyle}>Location:</Text>
-                                <Text>{_.isNil(this.state.location) ? 'No Location Selected' : this.state.location.name}</Text>
-                                <Button title="Pick" onPress={() => this.pickLocation()}/>
-                            </View>
-                        ):null
-                }
+
+                <View style={rowStyle}>
+                    <Text style={labelStyle}>Location:</Text>
+                    <Text>{_.isNil(this.state.location) ? 'No Location Selected' : this.state.location.name}</Text>
+                    <Button title="Pick" onPress={() => this.pickLocation()}/>
+                </View>
 
                 <View style={rowStyle}>
                     <Text style={labelStyle}>Date:</Text>

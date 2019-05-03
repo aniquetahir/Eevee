@@ -90,7 +90,7 @@ class EventItem extends React.Component{
         return (
             <Card>
                 <CardImage
-                source={{uri: 'http://bit.ly/2GfzooV'}}
+                source={{uri: `https://source.unsplash.com/1024x576?${this.props.category}&${name}`}}
                 title={name}
 
                 />
@@ -98,7 +98,9 @@ class EventItem extends React.Component{
                 subtitle={`Distance: ${_.round(distance, 2)} km`}
                 />
                 <CardContent text={(vacancy)?`Vacancy: ${vacancy}/${capacity}`:`Participants: ${num_participants}`} >
+
                 </CardContent>
+                <Text>Location: {this.props.location_name}</Text>
                 <Text>Date: {datetime}</Text>
                 <CardAction
                     separator={true}
@@ -221,6 +223,7 @@ export default class EventsScreen extends React.Component {
                            capacity={event.max}
                            num_participants={event.count_of_participants}
                            datetime={event.datetime}
+                        category={event.category}
                         is_joined={event.is_joined}
                         is_owner={event.is_owner}
                         event_id={event.event_id}
